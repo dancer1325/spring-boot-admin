@@ -4,13 +4,16 @@
 [[show-version-in-application-list]]
 == Show Version in Application List ==
 
-For *Spring Boot* applications the easiest way to show the version, is to use the `build-info` goal from the `spring-boot-maven-plugin`, which generates the `META-INF/build-info.properties`.
-See also the http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#howto-build-info[Spring Boot Reference Guide].
+* if you want to show version | application list
+    ** | NON-Spring Boot applications -> add a `version` or `build.version` | registration metadata
+    ** | Spring Boot applications, use
+        *** `spring-boot-maven-plugin` 's `build-info` goal
+            **** generates the `META-INF/build-info.properties`
+            **** check http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#howto-build-info[Spring Boot Reference Guide]
 
-For *non-Spring Boot* applications you can either add a `version` or `build.version` to the registration metadata and the version will show up in the application list.
 
 [source,xml]
-.pom.xml
+.pom.xml == via Maven
 ----
 <build>
     <plugins>
@@ -29,9 +32,9 @@ For *non-Spring Boot* applications you can either add a `version` or `build.vers
 </build>
 ----
 
-To generate the build-info in a gradle project, add the following snippet to your `build.gradle`:
+
 [source,groovy]
-.build.gradle
+.build.gradle == via Gradle
 ----
 springBoot {
 	buildInfo()
@@ -41,14 +44,15 @@ springBoot {
 [[jmx-bean-management]]
 == JMX-Bean Management ==
 
-To interact with JMX-beans in the admin UI you have to include
-https://jolokia.org/[Jolokia] in your application and expose it via the actuator endpoint.
-As Jolokia is servlet based there is no support for reactive applications.
-
-You might want to set `spring.jmx.enabled=true` if you want to expose Spring beans via JMX.
+* if you want to interact with JMX-beans | admin UI ->
+    ** include https://jolokia.org/[Jolokia] | your application &
+        *** Jolokia is servlet based -> NO support | reactive applications
+    ** expose it -- via the -- actuator endpoint
+* if you want to expose Spring beans -- via -- JMX -> set `spring.jmx.enabled=true`
 
 ==== Spring Boot 3 App ====
 
+* TODO:
 Spring Boot 3 does not support Jolokia directly, you need a separate dependency for Spring Boot 3 based applications.
 See https://jolokia.org/reference/html/manual/spring.html for more details.
 
@@ -79,26 +83,29 @@ provided the actuator itself, so you only the need the plain jolokia dependency.
 [[logfile]]
 == Logfile Viewer ==
 
-By default the logfile is not accessible via actuator endpoints and therefore not visible in Spring Boot Admin.
-In order to enable the logfile actuator endpoint you need to configure Spring Boot to write a logfile, either by setting
-`logging.file.path` or `logging.file.name`.
-
-Spring Boot Admin will detect everything that looks like an URL and render it as hyperlink.
-
-ANSI color-escapes are also supported.
-You need to set a custom file log pattern as Spring Boot's default one doesn't use colors.
-
-To enforce the use of ANSI-colored output, set `spring.output.ansi.enabled=ALWAYS`.
-Otherwise Spring tries to detect if ANSI-colored output is available and might disable it.
+* By default, logfile is NOT visible | Spring Boot Admin
+    ** Reason: 🧠logfile is NOT accessible -- via -- actuator endpoints🧠
+    ** ways to enable the logfile actuator endpoint
+        *** `logging.file.path`
+        *** `logging.file.name`
+* once it's configured
+    ** Spring Boot Admin
+        *** detect everything / looks like an URL &
+        *** renders it -- as -- hyperlink
+    ** ANSI color-escapes are ALSO supported
+        *** required to set a custom file log pattern
+            **** Reason: 🧠	Spring Boot's default one does NOT use colors 🧠
+        *** if you want to enforce the use of ANSI-colored output -> set `spring.output.ansi.enabled=ALWAYS`
+            **** Reason: 🧠	Spring tries to detect if ANSI-colored output is available & might disable it 🧠
 
 .application.properties
 ----
-logging.file.name=/var/log/sample-boot-application.log <1>
-logging.pattern.file=%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx <2>
+// destination the logfile is written to -> enables the logfile actuator endpoint
+logging.file.name=/var/log/sample-boot-application.log
+
+// file log pattern / using ANSI colors
+logging.pattern.file=%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx
 ----
-<1> Destination the logfile is written to.
-Enables the logfile actuator endpoint.
-<2> File log pattern using ANSI colors.
 
 [[show-instance-tags]]
 == Show Tags per Instance ==
@@ -118,13 +125,14 @@ info.tags.environment=test
 [[spring-boot-admin-client]]
 == Spring Boot Admin Client ==
 
-The Spring Boot Admin Client registers the application at the admin server.
-This is done by periodically doing a HTTP post request to the SBA Server providing information about the application.
+* Spring Boot Admin Client registers the application | Spring Boot Admin Server
+    ** how does it work?
+        *** SBA Client -- periodically does an HTTP post request to the -- SBA Server / -- provides information about the -- application
+    ** ways to configure the register of SBA Client | your application
+        *** built-in properties
+        *** provide your own `ApplicationFactory` implementation
 
-TIP: There are plenty of properties to influence the way how the SBA Client registers your application.
-In case that doesn't fit your needs, you can provide your own `ApplicationFactory` implementation.
-
-.Spring Boot Admin Client configuration options
+.Built-in Spring Boot Admin Client configuration options
 |===
 | Property name |Description |Default value
 
@@ -133,7 +141,11 @@ In case that doesn't fit your needs, you can provide your own `ApplicationFactor
 | `true`
 
 | spring.boot.admin.client.url
-| Comma separated ordered list of URLs of the Spring Boot Admin server to register at. This triggers the AutoConfiguration. *Mandatory*.
+| - Comma separated ordered list of URLs of the Spring Boot Admin server to register at
+
+- -> triggers the AutoConfiguration
+
+- *Mandatory*
 |
 
 | spring.boot.admin.client.api-path
@@ -195,14 +207,17 @@ spring.boot.admin.client.password
 
 | spring.boot.admin.client.instance.name
 | Name to register with.
-| `${spring.application.name}` if set, `"spring-boot-application"` otherwise.
+| == `${spring.application.name}` if set
+
+- else, == `"spring-boot-application"`
 
 | spring.boot.admin.client.instance.service-host-type
-| Select which information should be considered when sending the host of a service: +
-    * `IP`: Uses the IP returned by `InetAddress.getHostAddress()` +
-    * `HOST_NAME`: Uses the host name of a single machine returned by `InetAddress.getHostName()` +
-    * `CANONICAL_HOST_NAME`: Uses the FQDN returned by `InetAddress.geCanonicalHostName()` +
-    If `server.address` or `management.server.address` is set in the service, the value will overrule this property.
+| - information about the host of a service: +
+    * `IP`: IP / returned by `InetAddress.getHostAddress()` +
+    * `HOST_NAME`: host name of a single machine / returned by `InetAddress.getHostName()` +
+    * `CANONICAL_HOST_NAME`: FQDN / returned by `InetAddress.geCanonicalHostName()` +
+- if `server.address` or `management.server.address` is set on a service -> that value will overrule this property
+
 | `CANONICAL_HOST_NAME`
 
 
